@@ -29,8 +29,11 @@ class LabelCell: UICollectionViewCell {
     }
     
     private func setUp() {
+        isUserInteractionEnabled = false
         addSubview(label)
-        
+        if #available(iOS 10.0, *) {
+            label.adjustsFontForContentSizeCategory = true
+        }
         label.translatesAutoresizingMaskIntoConstraints = false
         label.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         label.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true

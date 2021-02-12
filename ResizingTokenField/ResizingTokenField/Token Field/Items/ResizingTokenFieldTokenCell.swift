@@ -8,30 +8,35 @@
 
 import UIKit
 
-class ResizingTokenFieldTokenCell: UICollectionViewCell, UIKeyInput {
+open class ResizingTokenFieldTokenCell: UICollectionViewCell, UIKeyInput {
     
     /// Configure item for the provided token and font.
-    func populate(withToken token: ResizingTokenFieldToken) {
+    open func populate(withToken token: ResizingTokenFieldToken) {
         // Override.
     }
     
-    /// Called when this token cell should be removed, usually due to user tapping backspace.
-    var onRemove: ((String?) -> Void)?
+    /// Called when cell should be removed due to user tapping a key while this cell is the first responder.
+    var onShouldBeRemoved: ((_ replacementText: String?) -> Void)?
     
+    /// Called when token cell is asked to resign first responder.
+    var onResignFirstResponder: ((_ isBeingRemoved: Bool) -> Void)?
+    
+    /// Set to `true` while this cell is asking if it should be removed.
+    var isBeingRemoved: Bool = false
     
     // MARK: UIResponder
     
     private(set) var isBecomingFirstResponder: Bool = false
     
-    override var canBecomeFirstResponder: Bool {
+    open override var canBecomeFirstResponder: Bool {
         return true
     }
     
-    override var canResignFirstResponder: Bool {
+    open override var canResignFirstResponder: Bool {
         return true
     }
     
-    override func becomeFirstResponder() -> Bool {
+    open override func becomeFirstResponder() -> Bool {
         isBecomingFirstResponder = true
         super.becomeFirstResponder()
         isBecomingFirstResponder = false
@@ -39,25 +44,30 @@ class ResizingTokenFieldTokenCell: UICollectionViewCell, UIKeyInput {
         return true
     }
     
-    override func resignFirstResponder() -> Bool {
+    open override func resignFirstResponder() -> Bool {
         super.resignFirstResponder()
         isBecomingFirstResponder = false
         isSelected = false
+        onResignFirstResponder?(isBeingRemoved)
         return true
     }
     
     // MARK: - UIKeyInput
     
-    var hasText: Bool {
+    public var hasText: Bool {
         return false
     }
     
-    func insertText(_ text: String) {
-        onRemove?(text)
+    public func insertText(_ text: String) {
+        isBeingRemoved = true
+        onShouldBeRemoved?(text)
+        isBeingRemoved = false
     }
     
-    func deleteBackward() {
-        onRemove?(nil)
+    public func deleteBackward() {
+        isBeingRemoved = true
+        onShouldBeRemoved?(nil)
+        isBeingRemoved = false
     }
     
 }

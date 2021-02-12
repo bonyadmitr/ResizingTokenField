@@ -8,17 +8,17 @@
 
 import Foundation
 
-protocol ResizingTokenFieldToken {
+public protocol ResizingTokenFieldToken {
     
     /// Title displayed on the token.
     var title: String { get }
     
-    /// Equality check. Protocol adopter can conform to Equatable instead of implementing this.
+    /// Equality check. Protocol adopter can conform to `Equatable` instead of implementing this.
     func isEqual(to token: ResizingTokenFieldToken) -> Bool
     
 }
 
-extension ResizingTokenFieldToken where Self: Equatable {
+public extension ResizingTokenFieldToken where Self: Equatable {
     
     func isEqual(to token: ResizingTokenFieldToken) -> Bool {
         guard let token = token as? Self else { return false }

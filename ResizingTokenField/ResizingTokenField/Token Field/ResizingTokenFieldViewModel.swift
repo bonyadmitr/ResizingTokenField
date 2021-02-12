@@ -14,18 +14,19 @@ class ResizingTokenFieldViewModel {
     // MARK: - Font
     
     /// Font used by all labels.
-    var font: UIFont = Constants.Font.defaultFont {
+    var font: UIFont = Constants.Default.font {
         didSet { defaultItemHeight = ceil(font.lineHeight) + 2 * Constants.Default.defaultTokenTopBottomPadding }
     }
     
     /// Height of items.
-    var defaultItemHeight: CGFloat = ceil(Constants.Font.defaultFont.lineHeight) + 2 * Constants.Default.defaultTokenTopBottomPadding
+    var defaultItemHeight: CGFloat = ceil(Constants.Default.font.lineHeight) + 2 * Constants.Default.defaultTokenTopBottomPadding
     var customItemHeight: CGFloat?
     var itemHeight: CGFloat { return customItemHeight ?? defaultItemHeight }
     
     // MARK: - Label cell
     
     var isShowingLabelCell: Bool = true
+    var isShowingEditCell: Bool = true
     var labelCellText: String?
     
     var labelCellIndexPath: IndexPath {
@@ -49,6 +50,10 @@ class ResizingTokenFieldViewModel {
     var textFieldCellMinSize: CGSize {
         return CGSize(width: textFieldCellMinWidth, height: itemHeight)
     }
+    
+    var keyboardType: UIKeyboardType = Constants.Default.keyboardType
+    
+    var autocapitalizationType: UITextAutocapitalizationType  = Constants.Default.autocapitalizationType
     
     // MARK: - Collapse/expand tokens
     
@@ -130,7 +135,8 @@ class ResizingTokenFieldViewModel {
     
     var lastTokenCellIndexPath: IndexPath? {
         guard tokensToDisplayCount > 0 else { return nil }
-        return IndexPath(item: numberOfItems - 2, section: 0)
+        let index = isShowingEditCell ? 2 : 1
+        return IndexPath(item: numberOfItems - index, section: 0)
     }
     
     var indexPathsForAllTokens: [IndexPath] {
@@ -159,16 +165,21 @@ class ResizingTokenFieldViewModel {
     // MARK: - Data source
     
     var numberOfItems: Int {
-        var count = tokensToDisplayCount + 1    // Tokens + text field cell
-        if isShowingLabelCell { count += 1 } // Label cell
+        var count = tokensToDisplayCount    // Tokens
+        if isShowingEditCell { count += 1 }    // text field cell
+        if isShowingLabelCell { count += 1 }    // Label cell
         return count
+    }
+    
+    var showPlaceholder: Bool {
+        tokensToDisplayCount == 0
     }
     
     func identifierForCell(atIndexPath indexPath: IndexPath) -> String {
         switch indexPath.item {
         case (isShowingLabelCell ? labelCellIndexPath.item : nil):
             return Constants.Identifier.labelCell
-        case textFieldCellIndexPath.item:
+        case textFieldCellIndexPath.item where isShowingEditCell:
             return Constants.Identifier.textFieldCell
         default:
             return Constants.Identifier.tokenCell
